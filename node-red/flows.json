@@ -1,0 +1,840 @@
+[
+    {
+        "id": "13dd9ce0479d56b8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "8dec7ed1aab3372b",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "broker.hivemq.com",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "7a04ec5f00e8b786",
+        "type": "mongodb3",
+        "uri": "mongodb://localhost:27017/",
+        "name": "",
+        "options": "",
+        "parallelism": "-1"
+    },
+    {
+        "id": "2a99d7a29ed54eea",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "sensors",
+        "name": "test",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://localhost:8086",
+        "timeout": "10",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "2a0aa3739219d236",
+        "type": "debug",
+        "z": "13dd9ce0479d56b8",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1200,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "bdb0632e0479efbd",
+        "type": "mqtt in",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "topic": "esp32/datanon",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "8dec7ed1aab3372b",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 140,
+        "y": 200,
+        "wires": [
+            [
+                "64717d2b36bdaf5c"
+            ]
+        ]
+    },
+    {
+        "id": "03004d10cfcd36d4",
+        "type": "mqtt out",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "topic": "esp32/datanon",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8dec7ed1aab3372b",
+        "x": 700,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "e320215627ba0e8d",
+        "type": "inject",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "esp32/data",
+        "payload": "{\"name\":\"esp32\",\"value\":25,\"datastore\":{\"value\":10,\"time\":\"13:00\",\"date\":\"mon\"}}",
+        "payloadType": "json",
+        "x": 510,
+        "y": 60,
+        "wires": [
+            [
+                "03004d10cfcd36d4"
+            ]
+        ]
+    },
+    {
+        "id": "361f725529b605e8",
+        "type": "mongodb3 in",
+        "z": "13dd9ce0479d56b8",
+        "service": "_ext_",
+        "configNode": "7a04ec5f00e8b786",
+        "name": "",
+        "collection": "data",
+        "operation": "insertOne",
+        "x": 950,
+        "y": 480,
+        "wires": [
+            [
+                "2a0aa3739219d236"
+            ]
+        ]
+    },
+    {
+        "id": "45d22c9a2cd279fb",
+        "type": "mongodb3 in",
+        "z": "13dd9ce0479d56b8",
+        "service": "_ext_",
+        "configNode": "7a04ec5f00e8b786",
+        "name": "",
+        "collection": "data",
+        "operation": "findOne",
+        "x": 380,
+        "y": 560,
+        "wires": [
+            [
+                "1451a78512c15bba"
+            ]
+        ]
+    },
+    {
+        "id": "c378374a36638a9d",
+        "type": "function",
+        "z": "13dd9ce0479d56b8",
+        "name": "function 1",
+        "func": "flow.set(\"data\",msg.payload);\nvar checkdataexist = msg.payload\nconst obj = JSON.parse(checkdataexist);\n\nmsg.payload = {\"name\":obj.name};\n\nflow.set(\"value\",obj.value);\nflow.set(\"datastoreNew\", obj.datastore);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 480,
+        "wires": [
+            [
+                "45d22c9a2cd279fb"
+            ]
+        ]
+    },
+    {
+        "id": "e7ebaaddf0ee626b",
+        "type": "json",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": true,
+        "x": 250,
+        "y": 400,
+        "wires": [
+            [
+                "c378374a36638a9d"
+            ]
+        ]
+    },
+    {
+        "id": "097286d587ac7735",
+        "type": "switch",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "empty"
+            },
+            {
+                "t": "nempty"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 670,
+        "y": 560,
+        "wires": [
+            [
+                "869b57a4befa696e"
+            ],
+            [
+                "5d3a9ea2ea2fa77c"
+            ]
+        ]
+    },
+    {
+        "id": "313b7b519913bc3b",
+        "type": "debug",
+        "z": "13dd9ce0479d56b8",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1460,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "f2afb47bbcb35471",
+        "type": "mongodb3 in",
+        "z": "13dd9ce0479d56b8",
+        "service": "_ext_",
+        "configNode": "7a04ec5f00e8b786",
+        "name": "",
+        "collection": "data",
+        "operation": "updateOne",
+        "x": 1130,
+        "y": 620,
+        "wires": [
+            [
+                "313b7b519913bc3b"
+            ]
+        ]
+    },
+    {
+        "id": "869b57a4befa696e",
+        "type": "function",
+        "z": "13dd9ce0479d56b8",
+        "name": "function 2",
+        "func": "var t = flow.get(\"data\");\nmsg.payload = t;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 480,
+        "wires": [
+            [
+                "26af71fea0a3cea9"
+            ]
+        ]
+    },
+    {
+        "id": "26af71fea0a3cea9",
+        "type": "json",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 690,
+        "y": 480,
+        "wires": [
+            [
+                "361f725529b605e8"
+            ]
+        ]
+    },
+    {
+        "id": "a0d96ed27a2553f9",
+        "type": "function",
+        "z": "13dd9ce0479d56b8",
+        "name": "function 3",
+        "func": "var ObjectId = global.get('ObjectId');\nmsg.payload = [\n    { \n        // \"name\": flow.get(\"name\")\n        \"_id\": ObjectId(flow.get(\"id\"))\n    },  \n    { \n        $set: { \"value\": flow.get(\"value\") } \n    }\n    ]\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 680,
+        "wires": [
+            [
+                "f2afb47bbcb35471"
+            ]
+        ]
+    },
+    {
+        "id": "8aff2b55ae209f6e",
+        "type": "function",
+        "z": "13dd9ce0479d56b8",
+        "name": "function 4",
+        "func": "var getIDdata = msg.payload\nconst obj = JSON.parse(getIDdata);\nflow.set(\"id\", obj._id );\n// flow.set(\"name\", String(obj.name));\nflow.set(\"datastoreOld\", obj.datastore);\n// const obj1 = obj.datastore\nflow.set(\"value1\", obj.value);\nflow.set(\"time\", obj.time);\nflow.set(\"date\", obj.date);\n\nmsg.payload = flow.set(\"time\", obj.time);\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 620,
+        "wires": [
+            [
+                "a0d96ed27a2553f9",
+                "3beeb2a7e4a749bb"
+            ]
+        ]
+    },
+    {
+        "id": "5d3a9ea2ea2fa77c",
+        "type": "json",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 550,
+        "y": 620,
+        "wires": [
+            [
+                "8aff2b55ae209f6e"
+            ]
+        ]
+    },
+    {
+        "id": "3beeb2a7e4a749bb",
+        "type": "function",
+        "z": "13dd9ce0479d56b8",
+        "name": "function 5",
+        "func": "var ObjectId = global.get('ObjectId');\nvar dataUpdate\nvar text = flow.get([\"datastoreOld\", \"datastoreNew\"])\nvar text1 = text[1]\ndataUpdate = []\nfor (let i = 0; i < text[0].length; i++) {\n    dataUpdate.push(text[0][i])\n}\ndataUpdate.push(text1[0])\nmsg.payload = [\n    { \n        // \"name\": flow.get(\"name\")\n        \"_id\": ObjectId(flow.get(\"id\"))\n    },  \n    {\n        $set: { \"datastore\":dataUpdate} \n        // \"$pust\": [{ \"datastore\": {\"$each\":flow.get(\"datastore\")}}]\n    }\n    ]\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 560,
+        "wires": [
+            [
+                "f2afb47bbcb35471"
+            ]
+        ]
+    },
+    {
+        "id": "4ee579f38b9bd9fb",
+        "type": "function",
+        "z": "13dd9ce0479d56b8",
+        "name": "function 6",
+        "func": "const obj = msg.payload\n\n\nmsg.payload = {\n    \"name\": obj.name,\n    \"value\": obj.value,\n    \"datastore\": [\n        {\n            \"value\": obj.value,\n            \"time\": obj.time,\n            \"date\": obj.date\n        }\n    ]\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 340,
+        "wires": [
+            [
+                "e7ebaaddf0ee626b"
+            ]
+        ]
+    },
+    {
+        "id": "54cfe5ec13775e2e",
+        "type": "mqtt out",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "topic": "esp32/datanonOut",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8dec7ed1aab3372b",
+        "x": 790,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "64717d2b36bdaf5c",
+        "type": "debug",
+        "z": "13dd9ce0479d56b8",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 500,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "653e324487680365",
+        "type": "influxdb out",
+        "z": "13dd9ce0479d56b8",
+        "influxdb": "2a99d7a29ed54eea",
+        "name": "",
+        "measurement": "datatest",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "test",
+        "bucket": "data",
+        "x": 510,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "10e254e75de49836",
+        "type": "influxdb in",
+        "z": "13dd9ce0479d56b8",
+        "influxdb": "2a99d7a29ed54eea",
+        "name": "",
+        "query": "",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "test",
+        "x": 740,
+        "y": 260,
+        "wires": [
+            [
+                "febf288bf34cf2c0"
+            ]
+        ]
+    },
+    {
+        "id": "15e3514a337e8b77",
+        "type": "inject",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 410,
+        "y": 260,
+        "wires": [
+            [
+                "15a6055282ccf677"
+            ]
+        ]
+    },
+    {
+        "id": "febf288bf34cf2c0",
+        "type": "debug",
+        "z": "13dd9ce0479d56b8",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 900,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "15a6055282ccf677",
+        "type": "function",
+        "z": "13dd9ce0479d56b8",
+        "name": "function 7",
+        "func": "msg.query = `from(bucket: \"data\")\n      |> range(start: 2024-07-14T18:35:18.372Z, stop: 2024-07-14T19:35:18.372Z)\n    |> filter(fn: (r) => r._measurement == \"datatest\")\n    |> filter(fn: (r) => r._field== \"name\" or r._field == \"value\" )`;\nreturn msg;\n\n// from(bucket: \"data\")\n//     |> range(start: 2024-07-14T18:35:18.372Z, stop: 2024-07-14T19:35:18.372Z)\n//     |> filter(fn: (r) => r._measurement == \"datatest\")\n//     |> filter(fn: (r) => r._field== \"name\" or r._field == \"value\" )\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 260,
+        "wires": [
+            [
+                "10e254e75de49836"
+            ]
+        ]
+    },
+    {
+        "id": "7b173e38c69408f4",
+        "type": "inject",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"name\":\"esp33_mqtt\"}",
+        "payloadType": "json",
+        "x": 220,
+        "y": 660,
+        "wires": [
+            [
+                "45d22c9a2cd279fb"
+            ]
+        ]
+    },
+    {
+        "id": "1451a78512c15bba",
+        "type": "debug",
+        "z": "13dd9ce0479d56b8",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "f0a9ba365e87e044",
+        "type": "inject",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"name\":\"esp33\",\"value\":25,\"datastore\":{\"value\":10,\"time\":\"13:00\",\"date\":\"mon\"}}",
+        "payloadType": "json",
+        "x": 450,
+        "y": 800,
+        "wires": [
+            [
+                "54cfe5ec13775e2e"
+            ]
+        ]
+    },
+    {
+        "id": "95f7ef407cc35838",
+        "type": "mqtt in",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "topic": "esp32/datacall",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "8dec7ed1aab3372b",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 430,
+        "y": 1020,
+        "wires": [
+            [
+                "54cfe5ec13775e2e",
+                "288e5faef6b32b40"
+            ]
+        ]
+    },
+    {
+        "id": "a3731768e5c61046",
+        "type": "inject",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"name\":\"esp34_mqtt\"}",
+        "payloadType": "json",
+        "x": 200,
+        "y": 700,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "472dcb8d5508888c",
+        "type": "mqtt out",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "topic": "esp32/datanonOut1",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8dec7ed1aab3372b",
+        "x": 790,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "7737c013b475b578",
+        "type": "inject",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"name\":\"esp34\",\"value\":1111,\"datastore\":{\"value\":10,\"time\":\"13:00\",\"date\":\"mon\"}}",
+        "payloadType": "json",
+        "x": 450,
+        "y": 880,
+        "wires": [
+            [
+                "472dcb8d5508888c"
+            ]
+        ]
+    },
+    {
+        "id": "63096498654e6056",
+        "type": "mqtt in",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "topic": "esp32/datacall1",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "8dec7ed1aab3372b",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 440,
+        "y": 1100,
+        "wires": [
+            [
+                "472dcb8d5508888c",
+                "f542a989a7f19240"
+            ]
+        ]
+    },
+    {
+        "id": "288e5faef6b32b40",
+        "type": "debug",
+        "z": "13dd9ce0479d56b8",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 1080,
+        "wires": []
+    },
+    {
+        "id": "f542a989a7f19240",
+        "type": "debug",
+        "z": "13dd9ce0479d56b8",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 1160,
+        "wires": []
+    },
+    {
+        "id": "55ce836b216f3ec0",
+        "type": "mqtt in",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "topic": "esp32/datacall2",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "8dec7ed1aab3372b",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 440,
+        "y": 1180,
+        "wires": [
+            [
+                "dc654c3573a62a5f",
+                "966b696585bfd8c3"
+            ]
+        ]
+    },
+    {
+        "id": "966b696585bfd8c3",
+        "type": "debug",
+        "z": "13dd9ce0479d56b8",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 1240,
+        "wires": []
+    },
+    {
+        "id": "dc654c3573a62a5f",
+        "type": "mqtt out",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "topic": "esp32/datanonOut2",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8dec7ed1aab3372b",
+        "x": 790,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "7e332652bd0bae2c",
+        "type": "inject",
+        "z": "13dd9ce0479d56b8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"name\":\"esp35\",\"value\":2222,\"datastore\":{\"value\":10,\"time\":\"13:00\",\"date\":\"mon\"}}",
+        "payloadType": "json",
+        "x": 450,
+        "y": 960,
+        "wires": [
+            [
+                "dc654c3573a62a5f"
+            ]
+        ]
+    }
+]
